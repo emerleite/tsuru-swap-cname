@@ -28,22 +28,44 @@ def remove_cname(app):
   conn = httplib.HTTPConnection(target)
   conn.request("DELETE", "/apps/" + app + '/cname', '', headers)
   response = conn.getresponse()
+  if response.status != 200:
+    return False
+  return True
 
 def set_cname(app, cname):
   headers = {"Content-Type" : "application/json", "Authorization" : "bearer " + token}
   conn = httplib.HTTPConnection(target)
   conn.request("POST", "/apps/" + app + '/cname', '{"cname": "' + cname + '"}', headers)
   response = conn.getresponse()
+  if response.status != 200:
+    return False
+  return True
 
 token = os.environ['TSURU_TOKEN']
 target = os.environ['TSURU_TARGET']
 
+app1 = sys.argv[1]
+app2 = sys.argv[2]
+
+cname1 = get_cname(app1)
+cname2 = get_cname(app1)
+
 apps = [sys.argv[1], sys.argv[2]]
 cnames = [get_cname(apps[1]), get_cname(apps[0])]
 
-for i,app in enumerate(apps):
-  if cnames[i] is not None:
-    set_cname(app, cnames[i])
-    print 'app ' + app + ' is live at ' + cnames[i]
-  else:
-    remove_cname(app)
+#reverse if first is not None
+if cnames[0] is not None:
+  cnames.reverse()
+  apps.reverse()
+
+cname = cnames[1]
+
+if not remove_cname(apps[0]):
+  print "Error removing cname of %s. Aborting..." % apps[0]
+  sys.exit(1)
+
+if set_cname(apps[1], cname):
+  print 'app ' + apps[1] + ' is live at ' + cname
+else:
+  print "Error adding cname of %s. Aborting..." % apps[1]
+  set_cname(apps[0], cname)
