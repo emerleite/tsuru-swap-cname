@@ -6,7 +6,7 @@ Swap cname between tsuru apps (plugin)
 Installation
 ------------
 
-tsuru plugin-install swap-cname https://raw.githubusercontent.com/globocom/tsuru-swap-cname/master/src/swap-cname.py
+tsuru plugin-install swap-cname https://raw.githubusercontent.com/globocom/tsuru-swap-cname/master/src/swap_cname.py
 
 Usage
 -----
