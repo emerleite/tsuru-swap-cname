@@ -8,7 +8,7 @@ import time
 from urlparse import urlparse
 
 
-class SwapCname:
+class SwapCname(object):
     def __init__(self, token, target):
         self.token = token
         self.target = target
