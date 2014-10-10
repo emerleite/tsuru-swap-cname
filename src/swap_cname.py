@@ -19,27 +19,23 @@ class SwapCname(object):
         conn.request("GET", "/apps/" + app, "", headers)
         response = conn.getresponse()
         data = json.loads(response.read())
-        if len(data.get("cname")) == 0:
-            return None
-        return data.get("cname")
+        if len(data.get("cname")):
+            return data.get("cname")
+        return None
 
     def remove_cname(self, app, cname):
         headers = {"Authorization" : "bearer " + self.token}
         conn = httplib.HTTPConnection(self.target)
         conn.request("DELETE", "/apps/" + app + '/cname', '{"cname": ' + json.dumps(cname) + '}', headers)
         response = conn.getresponse()
-        if response.status != 200:
-            return False
-        return True
+        return response.status == 200
 
     def set_cname(self, app, cname):
         headers = {"Content-Type" : "application/json", "Authorization" : "bearer " + self.token}
         conn = httplib.HTTPConnection(self.target)
         conn.request("POST", "/apps/" + app + '/cname', '{"cname": ' + json.dumps(cname) + '}', headers)
         response = conn.getresponse()
-        if response.status != 200:
-            return False
-        return True
+        return response.status == 200
 
     def total_units(self, app):
         headers = {"Authorization" : "bearer " + self.token}
