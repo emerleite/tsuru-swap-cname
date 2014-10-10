@@ -47,58 +47,53 @@ class SwapCname(object):
 
     def remove_units(self, app):
         units = str(self.total_units(app)-1)
-        print """
-        Removing %s units from %s ...""" % (units, app)
+        print "Removing {} units from {} ...".format(units, app)
 
         headers = {"Authorization" : "bearer " + self.token}
         conn = httplib.HTTPConnection(self.target)
         conn.request("DELETE", "/apps/" + app + '/units', units, headers)
         response = conn.getresponse()
         if response.status != 200:
-            print "Error removing units from %s. You'll need to remove manually." % app
+            print "Error removing units from {}. You'll need to remove manually.".format(app)
             return False
 
         while (self.total_units(app) > 1):
-            print "  Waiting for %s units to go down..." % app
+            print "  Waiting for {} units to go down...".format(app)
 
             time.sleep(1)
         return True
 
     def add_units(self, app, current_units):
         units = str(int(current_units) - self.total_units(app))
-        print """
-        Adding %s units to %s ...""" % (units, app)
+        print "\nAdding {} units to {} ...".format(units, app)
 
         headers = {"Authorization" : "bearer " + self.token}
         conn = httplib.HTTPConnection(self.target)
         conn.request("PUT", "/apps/" + app + '/units', units, headers)
         response = conn.getresponse()
         if response.status != 200:
-            print "Error adding units to %s. Aborting..." % app
+            print "Error adding units to {}. Aborting...".format(app)
             return False
         return True
 
     def swap(self, apps, cname):
-        print """
-        Changing live application to %s ...""" % apps[1]
+        print "\nChanging live application to {} ...".format(apps[1])
 
         if not self.add_units(apps[1], self.total_units(apps[0])):
             sys.exit()
 
         if not self.remove_cname(apps[0], cname):
-            print "Error removing cname of %s. Aborting..." % apps[0]
+            print "Error removing cname of {}. Aborting...".format(apps[0])
             self.remove_units(apps[1])
             sys.exit()
 
         if self.set_cname(apps[1], cname):
             self.remove_units(apps[0])
 
-            print """
-            Application %s is live at %s ...
-            """ % (apps[1], ','.join(cname))
+            print "\nApplication {} is live at {} ...\n".format(apps[1], ','.join(cname))
 
         else:
-            print "Error adding cname of %s. Aborting..." % apps[1]
+            print "Error adding cname of {}. Aborting...".format(apps[1])
             self.set_cname(apps[0], cname)
             self.remove_units(apps[1])
 
